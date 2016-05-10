@@ -30,4 +30,4 @@ Step 3. Add TagsEditText to your layout file
         TagsEditText:tagsCloseImage="@drawable/tag_close"/>
         
 ## Screen shots ##
-![enter image description here](http://i.imgur.com/ZJYlsNL.png?1)
+![enter image description here](http://i.imgur.com/ZJYlsNL.png?3)
