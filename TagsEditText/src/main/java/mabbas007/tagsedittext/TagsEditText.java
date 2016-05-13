@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -21,7 +20,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -50,7 +48,7 @@ public class TagsEditText extends EditText
 
     private ArrayList<String> mTags = new ArrayList<>();
 
-    private OnTagsChangedListener mListener;
+    private TagsEditListener mListener;
 
     public TagsEditText(Context context)
     {
@@ -255,10 +253,16 @@ public class TagsEditText extends EditText
     private void setTags()
     {
         afterTextEnabled = false;
+        boolean isEnterClicked = false;
 
         final Editable editable = getText();
 
-        String str = editable.toString().replaceAll("\n", " ");
+        String str = editable.toString();
+        if(str.contains("\n"))
+        {
+            str = str.replaceAll("\n", " ");
+            isEnterClicked = true;
+        }
 
         boolean isDeleting = mLastString.length() > str.length();
 
@@ -279,6 +283,10 @@ public class TagsEditText extends EditText
 
         mLastString = str;
         afterTextEnabled = true;
+        if(isEnterClicked && mListener != null)
+        {
+            mListener.onEditingFinished();
+        }
     }
 
     private void buildTags(String str)
@@ -380,14 +388,15 @@ public class TagsEditText extends EditText
         return textView;
     }
 
-    public void setOnTagsChangedListener(OnTagsChangedListener listener)
+    public void setTagsListener(TagsEditListener listener)
     {
         mListener = listener;
     }
 
-    public interface OnTagsChangedListener
+    public interface TagsEditListener
     {
         void onTagsChanged(ArrayList<String> tags);
+        void onEditingFinished();
     }
 
     @Override
