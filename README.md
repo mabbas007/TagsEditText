@@ -18,7 +18,7 @@ Add it in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 	dependencies {
-        compile 'com.github.mabbas007:TagsEditText:v0.90'
+        compile 'com.github.mabbas007:TagsEditText:v0.91'
 	}
 
 Step 3. Add TagsEditText to your layout file
