@@ -1,3 +1,4 @@
+![enter image description here](https://img.shields.io/badge/Android%20Arsenal-TagsEditText-green.svg?style=true%29%5D%28https://android-arsenal.com/details/1/3581)
 Welcome to TagEditView!
 ===================
 
