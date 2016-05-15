@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements TagsEditText.Tags
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mTagsEditText.setTags("1", "2", "3");
                 mTagsEditText.setTagsBackgroundColor(android.R.color.holo_orange_dark);
                 //tagsEditText.setTagsTextColor(R.color.colorPrimary);
             }

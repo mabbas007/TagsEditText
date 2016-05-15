@@ -121,21 +121,22 @@ public class TagsEditText extends EditText {
             getText().append(source).append(SEPARATOR);
         }
         mLastString = getText().toString();
+        setText(getText());
     }
 
     public void setTagsTextColor(int color) {
         mTagsTextColor = ResourceUtils.getColor(getContext(), color);
-        setTags();
+        setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setTagsBackgroundColor(int color) {
         mTagsBackgroundColor = ResourceUtils.getColor(getContext(), color);
-        setTags();
+        setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setCloseDrawable(Drawable drawable) {
         mCloseDrawable = drawable;
-        setTags();
+        setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setTagsListener(TagsEditListener listener) {
@@ -264,7 +265,7 @@ public class TagsEditText extends EditText {
             setMovementMethod(LinkMovementMethod.getInstance());
             setSelection(sb.length());
             if (mListener != null && !str.equals(mLastString)) {
-                mListener.onTagsChanged(convertTagSpanToString(mTagSpans));
+                mListener.onTagsChanged(convertTagSpanToList(mTagSpans));
             }
         }
     }
@@ -334,15 +335,24 @@ public class TagsEditText extends EditText {
         mTags.remove(tagIndex);
         mTagSpans.remove(tagIndex);
         if (mListener == null) return;
-        mListener.onTagsChanged(convertTagSpanToString(mTagSpans));
+        mListener.onTagsChanged(convertTagSpanToList(mTagSpans));
     }
 
-    private static List<String> convertTagSpanToString(List<TagSpan> tagSpans) {
+    private static List<String> convertTagSpanToList(List<TagSpan> tagSpans) {
         List<String> tags = new ArrayList<>(tagSpans.size());
         for (TagSpan tagSpan : tagSpans) {
             tags.add(tagSpan.getSource());
         }
         return tags;
+    }
+
+    private static CharSequence[] convertTagSpanToArray(List<TagSpan> tagSpans) {
+        int size = tagSpans.size();
+        CharSequence[] values = new CharSequence[size];
+        for (int i = 0; i < size; i++) {
+            values[i] = tagSpans.get(i).getSource();
+        }
+        return values;
     }
 
     private Drawable convertViewToDrawable(View view) {
