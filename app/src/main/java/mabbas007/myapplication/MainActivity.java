@@ -5,9 +5,12 @@ import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import mabbas007.tagsedittext.TagsEditText;
 
@@ -24,6 +27,14 @@ public class MainActivity extends AppCompatActivity
         mTagsEditText = (TagsEditText) findViewById(R.id.tagsEditText);
         mTagsEditText.setTags("1", "2", "3", "4", "5 6", " 7 8 ");
         mTagsEditText.setTagsListener(this);
+        int count = 300;
+        List<String> values = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            values.add(String.valueOf(i));
+        }
+        mTagsEditText.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, values));
+        mTagsEditText.setThreshold(0);
 
         setButtonClickListener(R.id.btnChangeTags);
         setButtonClickListener(R.id.btnChangeBackground);
@@ -32,6 +43,14 @@ public class MainActivity extends AppCompatActivity
         setButtonClickListener(R.id.btnChangeDrawableLeft);
         setButtonClickListener(R.id.btnChangeDrawableRight);
         setButtonClickListener(R.id.btnChangeClosePadding);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            mTagsEditText.showDropDown();
+        }
     }
 
     @Override

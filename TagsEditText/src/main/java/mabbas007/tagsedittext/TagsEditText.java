@@ -28,6 +28,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -43,7 +44,7 @@ import mabbas007.tagsedittext.utils.ResourceUtils;
  * Needs a lot of work
  * BETA
  */
-public class TagsEditText extends EditText {
+public class TagsEditText extends AutoCompleteTextView {
 
     private static final String SEPARATOR = " ";
     public static final String NEW_LINE = "\n";
@@ -62,6 +63,23 @@ public class TagsEditText extends EditText {
     private List<Tag> mTags = new ArrayList<>();
 
     private TagsEditListener mListener;
+
+    private final TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (afterTextEnabled) {
+                setTags();
+            }
+        }
+    };
 
     public TagsEditText(Context context) {
         super(context);
@@ -98,11 +116,35 @@ public class TagsEditText extends EditText {
      */
     @Override
     public void setText(CharSequence text, BufferType type) {
-        String textWithSeparator = text.toString();
-        if (!textWithSeparator.endsWith(NEW_LINE) && !TextUtils.isEmpty(textWithSeparator)) {
-            textWithSeparator += NEW_LINE;
+        if (!TextUtils.isEmpty(text)) {
+            String source = text.toString().trim();
+            if (mTags.isEmpty()) {
+                Tag tag = new Tag();
+                tag.setIndex(0);
+                tag.setPosition(0);
+                tag.setSource(source);
+                tag.setSpan(true);
+                mTags.add(tag);
+            } else {
+                int size = mTags.size();
+                Tag lastTag = mTags.get(size - 1);
+                if (!lastTag.isSpan()) {
+                    lastTag.setSource(source);
+                    lastTag.setSpan(true);
+                } else {
+                    Tag newTag = new Tag();
+                    newTag.setIndex(size);
+                    newTag.setPosition(lastTag.getPosition() + lastTag.getSource().length() + 1);
+                    newTag.setSource(source);
+                    newTag.setSpan(true);
+                    mTags.add(newTag);
+                }
+            }
+            buildStringWithTags(mTags);
+            mTextWatcher.afterTextChanged(getText());
+        } else {
+            super.setText(text, type);
         }
-        super.setText(textWithSeparator, type);
     }
 
     /**
@@ -111,11 +153,10 @@ public class TagsEditText extends EditText {
     public void setTags(CharSequence ... tags) {
         mTagSpans.clear();
         mTags.clear();
-        getText().clear();
 
         int length = tags.length;
         int position = 0;
-        for (int i = 0; i < length; i++, position = getText().length()) {
+        for (int i = 0; i < length; i++) {
             Tag tag = new Tag();
             tag.setIndex(i);
             tag.setPosition(position);
@@ -123,10 +164,21 @@ public class TagsEditText extends EditText {
             tag.setSource(source);
             tag.setSpan(true);
             mTags.add(tag);
-            getText().append(source).append(SEPARATOR);
+            position += source.length() + 1;
+        }
+        buildStringWithTags(mTags);
+        mTextWatcher.afterTextChanged(getText());
+    }
+
+    private void buildStringWithTags(List<Tag> tags) {
+        getText().clear();
+        for (Tag tag : tags) {
+            getText().append(tag.getSource()).append(SEPARATOR);
         }
         mLastString = getText().toString();
-        setText(getText());
+        if (!TextUtils.isEmpty(mLastString)) {
+            getText().append(NEW_LINE);
+        }
     }
 
     public void setTagsTextColor(@ColorRes int color) {
@@ -203,23 +255,8 @@ public class TagsEditText extends EditText {
                     } else {
                         getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     }
-                    addTextChangedListener(new TextWatcher() {
-                        @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                        }
-
-                        @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        }
-
-                        @Override
-                        public void afterTextChanged(Editable s) {
-                            if (afterTextEnabled) {
-                                setTags();
-                            }
-                        }
-                    });
-                    setText(getText());
+                    addTextChangedListener(mTextWatcher);
+                    mTextWatcher.afterTextChanged(getText());
                 }
             });
         }
@@ -246,6 +283,10 @@ public class TagsEditText extends EditText {
                 removeTagSpan(editable, toRemoveSpan, false);
                 str = editable.toString();
             }
+        }
+
+        if (getFilter() != null) {
+            performFiltering(getNewTag(str), 0);
         }
 
         if (str.endsWith(NEW_LINE) && !isDeleting) {
@@ -296,12 +337,7 @@ public class TagsEditText extends EditText {
     }
 
     private void updateTags(String newString) {
-        StringBuilder builder = new StringBuilder();
-        for (Tag tag : mTags) {
-            if (!tag.isSpan()) continue;
-            builder.append(tag.getSource()).append(SEPARATOR);
-        }
-        String source = newString.replace(builder.toString(), "");
+        String source = getNewTag(newString);
         if (!TextUtils.isEmpty(source)
                 && !source.equals(NEW_LINE)) {
             boolean isSpan = source.endsWith(NEW_LINE);
@@ -323,6 +359,15 @@ public class TagsEditText extends EditText {
             }
             mTags.add(tag);
         }
+    }
+
+    private String getNewTag(String newString) {
+        StringBuilder builder = new StringBuilder();
+        for (Tag tag : mTags) {
+            if (!tag.isSpan()) continue;
+            builder.append(tag.getSource()).append(SEPARATOR);
+        }
+        return newString.replace(builder.toString(), "");
     }
 
     private void addTagSpan(SpannableStringBuilder sb, final TagSpan tagSpan) {
