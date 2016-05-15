@@ -6,8 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 
 import mabbas007.tagsedittext.TagsEditText;
 
@@ -29,13 +29,11 @@ public class MainActivity extends AppCompatActivity implements TagsEditText.Tags
                 //tagsEditText.setTagsTextColor(R.color.colorPrimary);
             }
         });
-
-
         mTagsEditText.setTagsListener(this);
     }
 
     @Override
-    public void onTagsChanged(ArrayList<String> tags) {
+    public void onTagsChanged(Collection<String> tags) {
         Log.d(TAG, "Tags changed: ");
         Log.d(TAG, Arrays.toString(tags.toArray()));
     }

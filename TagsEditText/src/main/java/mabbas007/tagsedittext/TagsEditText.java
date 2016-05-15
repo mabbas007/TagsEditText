@@ -15,17 +15,21 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import mabbas007.tagsedittext.utils.ResourceUtils;
 
@@ -39,6 +43,7 @@ public class TagsEditText extends EditText {
 
     private static final String TAG = "TagsEditText";
     private static final String SEPARATOR = " ";
+    public static final String NEW_LINE = "\n";
 
     private String mLastString = "";
     private boolean afterTextEnabled = true;
@@ -47,7 +52,7 @@ public class TagsEditText extends EditText {
     private int mTagsBackgroundColor;
     private Drawable mCloseDrawable;
 
-    private ArrayList<String> mTags = new ArrayList<>();
+    private List<TagSpan> mTags = new ArrayList<>();
 
     private TagsEditListener mListener;
 
@@ -84,7 +89,7 @@ public class TagsEditText extends EditText {
     @Override
     public void setText(CharSequence text, BufferType type) {
         String textWithSeparator = text.toString();
-        if (!textWithSeparator.endsWith(SEPARATOR)) {
+        if (!textWithSeparator.endsWith(SEPARATOR) && !TextUtils.isEmpty(textWithSeparator)) {
             textWithSeparator += SEPARATOR;
         }
         super.setText(textWithSeparator, type);
@@ -134,22 +139,36 @@ public class TagsEditText extends EditText {
                 | InputType.TYPE_TEXT_FLAG_MULTI_LINE
                 | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 
-        addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+        ViewTreeObserver viewTreeObserver = getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    } else {
+                        getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    }
+                    addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (afterTextEnabled) {
-                    setTags();
+                        @Override
+                        public void afterTextChanged(Editable s) {
+                            if (afterTextEnabled) {
+                                setTags();
+                            }
+                        }
+                    });
+                    setText(getText());
                 }
-            }
-        });
+            });
+        }
     }
 
     private void setTags() {
@@ -158,8 +177,8 @@ public class TagsEditText extends EditText {
 
         final Editable editable = getText();
         String str = editable.toString();
-        if (str.contains("\n")) {
-            str = str.replaceAll("\n", SEPARATOR);
+        if (str.contains(NEW_LINE)) {
+            str = str.replaceAll(NEW_LINE, SEPARATOR);
             isEnterClicked = true;
         }
 
@@ -168,7 +187,7 @@ public class TagsEditText extends EditText {
         if (mLastString.endsWith(SEPARATOR) && !str.endsWith(SEPARATOR) && isDeleting) {
             TagSpan[] toRemoveSpans = editable.getSpans(0, str.length(), TagSpan.class);
             if (toRemoveSpans.length > 0) {
-                removeSpan(editable, toRemoveSpans[toRemoveSpans.length - 1], false);
+                removeTagSpan(editable, toRemoveSpans[toRemoveSpans.length - 1], false);
                 str = editable.toString();
             }
         }
@@ -185,48 +204,33 @@ public class TagsEditText extends EditText {
     }
 
     private void buildTags(String str) {
-        mTags.clear();
         if (str.length() != 0) {
-            String[] tags = str.split("\\s+");
-            Collections.addAll(mTags, tags);
+            List<String> tags = Arrays.asList(str.split("\\s+"));
 
             SpannableStringBuilder sb = new SpannableStringBuilder();
-
-            int startSpan, endSpan;
-
-            int size = tags.length;
+            int size = tags.size();
             boolean tagsEndWithSpace = str.endsWith(SEPARATOR);
             if (!tagsEndWithSpace) {
-                size = tags.length - 1;
-                mTags.remove(mTags.size() - 1);
+                tags.remove(size - 1);
+                size = tags.size();
             }
-            for (int i = 0; i < size; i++) {
-                TextView tv = createTextView(tags[i]);
+            for (final TagSpan tagSpan : mTags) {
+                addTagSpan(sb, tagSpan);
+            }
+            for (int i = mTags.size(); i < size; i++) {
+                String tag = tags.get(i);
+                TextView tv = createTextView(tag);
                 Drawable bd = convertViewToDrawable(tv);
                 bd.setBounds(0, 0, bd.getIntrinsicWidth(), bd.getIntrinsicHeight());
-
-                sb.append(tags[i]);
-                sb.append(SEPARATOR);
-                startSpan = sb.length() - (tags[i].length() + 1);
-                endSpan = sb.length() - 1;
-
-                final TagSpan span = new TagSpan(bd, tags[i]);
-                span.setTagPosition(startSpan);
-                sb.setSpan(span, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                sb.setSpan(new ClickableSpan() {
-                    @Override
-                    public void onClick(View widget) {
-                        Editable editable = ((EditText) widget).getText();
-                        afterTextEnabled = false;
-                        removeSpan(editable, span, true);
-                        afterTextEnabled = true;
-                    }
-                }, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                final TagSpan span = new TagSpan(bd, tag);
+                int position = addTagSpan(sb, span);
+                span.setPosition(position);
+                span.setIndex(i);
+                mTags.add(span);
             }
 
-
             if (!tagsEndWithSpace) {
-                sb.append(tags[tags.length - 1]);
+                sb.append(tags.get(tags.size() - 1));
             }
 
             getText().clear();
@@ -234,27 +238,54 @@ public class TagsEditText extends EditText {
             setMovementMethod(LinkMovementMethod.getInstance());
             setSelection(sb.length());
             if (mListener != null && !str.equals(mLastString)) {
-                mListener.onTagsChanged(mTags);
+                mListener.onTagsChanged(convertTagSpanToString(mTags));
             }
         }
     }
 
-    private void removeSpan(Editable editable, TagSpan span, boolean includeSpace) {
-        if (includeSpace) {
-            // inlcude space
-            editable.replace(span.getTagPosition(), span.getTagPosition() + span.getSource().length() + 1, "");
-            buildTags(editable.toString());
-            // if build tags found nothing won't notify listener
-            if (mListener != null && mTags.size() == 0) {
-                mListener.onTagsChanged(mTags);
+    private int addTagSpan(SpannableStringBuilder sb, final TagSpan tagSpan) {
+        String source = tagSpan.getSource();
+        sb.append(source).append(SEPARATOR);
+        int length = sb.length();
+        int startSpan = length - (source.length() + 1);
+        int endSpan = length - 1;
+        sb.setSpan(tagSpan, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                Editable editable = ((EditText) widget).getText();
+                afterTextEnabled = false;
+                removeTagSpan(editable, tagSpan, true);
+                afterTextEnabled = true;
             }
-        } else {
-            editable.replace(span.getTagPosition(), span.getTagPosition() + span.getSource().length(), "");
-            mTags.remove(mTags.size() - 1);
-            if (mListener != null) {
-                mListener.onTagsChanged(mTags);
-            }
+        }, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return startSpan;
+    }
+
+    private void removeTagSpan(Editable editable, TagSpan span, boolean includeSpace) {
+        int extraLength = includeSpace ? 1 : 0;
+        // inlcude space
+        int tagPosition = span.getPosition();
+        int tagIndex = span.getIndex();
+        int tagLength = span.getSource().length() + extraLength;
+        editable.replace(tagPosition, tagPosition + tagLength, "");
+        int size = mTags.size();
+        for (int i = tagIndex + 1; i < size; i++) {
+            TagSpan tagSpan = mTags.get(i);
+            tagSpan.setIndex(i - 1);
+            tagSpan.setPosition(tagSpan.getPosition() - tagLength);
         }
+        mTags.remove(tagIndex);
+        if (mListener == null) return;
+        mListener.onTagsChanged(convertTagSpanToString(mTags));
+    }
+
+    private static List<String> convertTagSpanToString(List<TagSpan> tagSpans) {
+        List<String> tags = new ArrayList<>(tagSpans.size());
+        for (TagSpan tagSpan : tagSpans) {
+            tags.add(tagSpan.getSource());
+        }
+        return tags;
     }
 
     private Drawable convertViewToDrawable(View view) {
@@ -290,60 +321,71 @@ public class TagsEditText extends EditText {
     private static final class TagSpan extends ImageSpan {
 
         private int mPosition;
-
-        public TagSpan(Context context, Bitmap b) {
-            super(context, b);
-        }
-
-        public TagSpan(Context context, Bitmap b, int verticalAlignment) {
-            super(context, b, verticalAlignment);
-        }
-
-        public TagSpan(Drawable d) {
-            super(d);
-        }
-
-        public TagSpan(Drawable d, int verticalAlignment) {
-            super(d, verticalAlignment);
-        }
+        private int mIndex;
 
         public TagSpan(Drawable d, String source) {
             super(d, source);
         }
 
-        public TagSpan(Drawable d, String source, int verticalAlignment) {
+        // private constructors
+
+        private TagSpan(Context context, Bitmap b) {
+            super(context, b);
+        }
+
+        private TagSpan(Context context, Bitmap b, int verticalAlignment) {
+            super(context, b, verticalAlignment);
+        }
+
+        private TagSpan(Drawable d) {
+            super(d);
+        }
+
+        private TagSpan(Drawable d, int verticalAlignment) {
+            super(d, verticalAlignment);
+        }
+
+        private TagSpan(Drawable d, String source, int verticalAlignment) {
             super(d, source, verticalAlignment);
         }
 
-        public TagSpan(Context context, Uri uri) {
+        private TagSpan(Context context, Uri uri) {
             super(context, uri);
         }
 
-        public TagSpan(Context context, Uri uri, int verticalAlignment) {
+        private TagSpan(Context context, Uri uri, int verticalAlignment) {
             super(context, uri, verticalAlignment);
         }
 
-        public TagSpan(Context context, int resourceId) {
+        private TagSpan(Context context, int resourceId) {
             super(context, resourceId);
         }
 
-        public TagSpan(Context context, int resourceId, int verticalAlignment) {
+        private TagSpan(Context context, int resourceId, int verticalAlignment) {
             super(context, resourceId, verticalAlignment);
         }
 
-        public void setTagPosition(int pos) {
+        public void setPosition(int pos) {
             mPosition = pos;
         }
 
-        public int getTagPosition() {
+        public int getPosition() {
             return mPosition;
+        }
+
+        public void setIndex(int index) {
+            mIndex = index;
+        }
+
+        public int getIndex() {
+            return mIndex;
         }
 
     }
 
     public interface TagsEditListener {
 
-        void onTagsChanged(ArrayList<String> tags);
+        void onTagsChanged(Collection<String> tags);
         void onEditingFinished();
 
     }
@@ -351,7 +393,7 @@ public class TagsEditText extends EditText {
     public static class TagsEditListenerAdapter implements TagsEditListener {
 
         @Override
-        public void onTagsChanged(ArrayList<String> tags) {
+        public void onTagsChanged(Collection<String> tags) {
         }
 
         @Override
