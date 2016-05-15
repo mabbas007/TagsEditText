@@ -154,7 +154,7 @@ public class TagsEditText extends AutoCompleteTextView {
         mTagSpans.clear();
         mTags.clear();
 
-        int length = tags.length;
+        int length = tags != null ? tags.length : 0;
         int position = 0;
         for (int i = 0; i < length; i++) {
             Tag tag = new Tag();
