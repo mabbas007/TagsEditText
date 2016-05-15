@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:TagsEditText="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -11,17 +11,63 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="mabbas007.myapplication.MainActivity">
 
-    <mabbas007.tagsedittext.TagsEditText
-        android:id="@+id/tagsEditText"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        TagsEditText:tagsBackgroundColor="@color/colorAccent"
-        TagsEditText:tagsTextColor="@android:color/white"/>
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+        <mabbas007.tagsedittext.TagsEditText
+            android:id="@+id/tagsEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
-    <Button
-        android:id="@+id/btnChangeColor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Change color"/>
-</RelativeLayout>
+        <Button
+            android:id="@+id/btnChangeTags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Tags to 1 2 3"/>
+
+        <Button
+            android:id="@+id/btnChangeBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Change Background"/>
+
+        <Button
+            android:id="@+id/btnChangeColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Change Text Color"/>
+
+        <Button
+            android:id="@+id/btnChangeSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Change Text Size"/>
+
+        <Button
+            android:id="@+id/btnChangeDrawableLeft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Change Drawable Left"/>
+
+        <Button
+            android:id="@+id/btnChangeDrawableRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Change Drawable Right"/>
+
+        <Button
+            android:id="@+id/btnChangeClosePadding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Change Close Padding"/>
+    </LinearLayout>
+
+</ScrollView>
