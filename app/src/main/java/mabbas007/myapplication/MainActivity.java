@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements TagsEditText.Tags
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTagsEditText = (TagsEditText) findViewById(R.id.tagsEditText);
+        mTagsEditText.setTags("1", "2", "3", "4", "5 6", " 7 8 ");
         Button button = (Button) findViewById(R.id.btnChangeColor);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
