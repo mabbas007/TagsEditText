@@ -7,11 +7,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorRes;
+import android.support.annotation.DimenRes;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputType;
@@ -23,6 +25,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.EditText;
@@ -42,7 +45,6 @@ import mabbas007.tagsedittext.utils.ResourceUtils;
  */
 public class TagsEditText extends EditText {
 
-    private static final String TAG = "TagsEditText";
     private static final String SEPARATOR = " ";
     public static final String NEW_LINE = "\n";
 
@@ -50,8 +52,11 @@ public class TagsEditText extends EditText {
     private boolean afterTextEnabled = true;
 
     private int mTagsTextColor;
-    private int mTagsBackgroundColor;
-    private Drawable mCloseDrawable;
+    private float mTagsTextSize;
+    private int mTagsBackground;
+    private Drawable mCloseDrawableLeft;
+    private Drawable mCloseDrawableRight;
+    private int mCloseDrawablePadding;
 
     private List<TagSpan> mTagSpans = new ArrayList<>();
     private List<Tag> mTags = new ArrayList<>();
@@ -124,18 +129,33 @@ public class TagsEditText extends EditText {
         setText(getText());
     }
 
-    public void setTagsTextColor(int color) {
+    public void setTagsTextColor(@ColorRes int color) {
         mTagsTextColor = ResourceUtils.getColor(getContext(), color);
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
-    public void setTagsBackgroundColor(int color) {
-        mTagsBackgroundColor = ResourceUtils.getColor(getContext(), color);
+    public void setTagsTextSize(@DimenRes int textSize) {
+        mTagsTextSize = ResourceUtils.getDimension(getContext(), textSize);
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
-    public void setCloseDrawable(Drawable drawable) {
-        mCloseDrawable = drawable;
+    public void setTagsBackground(@DrawableRes int background) {
+        mTagsBackground = background;
+        setTags(convertTagSpanToArray(mTagSpans));
+    }
+
+    public void setCloseDrawableLeft(@DrawableRes int drawable) {
+        mCloseDrawableLeft = ResourceUtils.getDrawable(getContext(), drawable);
+        setTags(convertTagSpanToArray(mTagSpans));
+    }
+
+    public void setCloseDrawableRight(@DrawableRes int drawable) {
+        mCloseDrawableRight = ResourceUtils.getDrawable(getContext(), drawable);
+        setTags(convertTagSpanToArray(mTagSpans));
+    }
+
+    public void setCloseDrawablePadding(@DimenRes int padding) {
+        mCloseDrawablePadding = ResourceUtils.getDimensionPixelSize(getContext(), padding);
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
@@ -144,20 +164,25 @@ public class TagsEditText extends EditText {
     }
 
     private void init(@Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        Context context = getContext();
         if (attrs == null) {
-            mTagsTextColor = ResourceUtils.getColor(getContext(), android.R.color.white);
-            mTagsBackgroundColor = ResourceUtils.getColor(getContext(), android.R.color.holo_green_light);
+            mTagsTextColor = ResourceUtils.getColor(context, R.color.defaultTagsTextColor);
+            mTagsTextSize = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize);
+            mTagsBackground = R.drawable.oval;
+            mCloseDrawableRight = ResourceUtils.getDrawable(context, R.drawable.oval);
+            mCloseDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
         } else {
-            TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.TagsEditText, defStyleAttr, defStyleRes);
+            TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TagsEditText, defStyleAttr, defStyleRes);
             try {
                 mTagsTextColor = typedArray.getColor(R.styleable.TagsEditText_tagsTextColor,
-                        ResourceUtils.getColor(getContext(), android.R.color.white));
-                mTagsBackgroundColor = typedArray.getColor(R.styleable.TagsEditText_tagsBackgroundColor,
-                        ResourceUtils.getColor(getContext(), android.R.color.holo_green_light));
-                mCloseDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImage);
-                if (mCloseDrawable == null) {
-                    mCloseDrawable = ResourceUtils.getDrawable(getContext(), R.drawable.tag_close);
-                }
+                        ResourceUtils.getColor(context, R.color.defaultTagsTextColor));
+                mTagsTextSize = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsTextSize,
+                        ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize));
+                mTagsBackground = typedArray.getInt(R.styleable.TagsEditText_tagsBackground,
+                        R.drawable.oval);
+                mCloseDrawableRight = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageRight);
+                mCloseDrawableLeft = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageLeft);
+                mCloseDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
             } finally {
                 typedArray.recycle();
             }
@@ -376,12 +401,11 @@ public class TagsEditText extends EditText {
             textView.setMaxWidth(getWidth() - 50);
         }
         textView.setText(text);
-        textView.setTextSize(16);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTagsTextSize);
         textView.setTextColor(mTagsTextColor);
-        textView.setBackgroundResource(R.drawable.oval);
-        ((GradientDrawable) textView.getBackground()).setColor(mTagsBackgroundColor);
-        textView.setCompoundDrawablesWithIntrinsicBounds(null, null, mCloseDrawable, null);
-        textView.setCompoundDrawablePadding(10);
+        textView.setBackgroundResource(mTagsBackground);
+        textView.setCompoundDrawablesWithIntrinsicBounds(mCloseDrawableLeft, null, mCloseDrawableRight, null);
+        textView.setCompoundDrawablePadding(mCloseDrawablePadding);
         return textView;
     }
 
