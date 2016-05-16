@@ -18,17 +18,22 @@ allprojects {
 Step 2. Add the dependency
 ```groovy
 dependencies {
-	compile 'com.github.mabbas007:TagsEditText:v0.91'
+	compile 'com.github.mabbas007:TagsEditText:v0.95'
 }
 ```
 Step 3. Add TagsEditText to your layout file
 ```xml
 <mabbas007.tagsedittext.TagsEditText
-	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	TagsEditText:tagsTextColor="@android:color/white"
-	TagsEditText:tagsBackgroundColor="@android:color/holo_green_light"
-	TagsEditText:tagsCloseImage="@drawable/tag_close"/>
+        android:id="@+id/tagsEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        TagsEditText:allowSpaceInTag="true"
+        TagsEditText:tagsCloseImageRight="@drawable/tag_close"
+        TagsEditText:tagsBackground="@drawable/square"
+        TagsEditText:tagsCloseImageLeft="@drawable/dot"
+        TagsEditText:tagsTextColor="@color/blackOlive"
+        TagsEditText:tagsTextSize="@dimen/defaultTagsTextSize"
+        TagsEditText:tagsCloseImagePadding="@dimen/defaultTagsCloseImagePadding"/>
 ```  
         
 ## Screen shots ##
