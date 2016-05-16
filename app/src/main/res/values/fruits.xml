@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="fruits">
+        <item>Apple</item>
+        <item>Apricot</item>
+        <item>Avocado</item>
+        <item>Banana</item>
+        <item>Bilberry</item>
+        <item>Blackberry</item>
+        <item>Blackcurrant</item>
+        <item>Blueberry</item>
+        <item>Boysenberry</item>
+        <item>Cantaloupe</item>
+        <item>Currant</item>
+        <item>Cherry</item>
+        <item>Cherimoya</item>
+        <item>Cloudberry</item>
+        <item>Coconut</item>
+        <item>Cranberry</item>
+        <item>Damson</item>
+        <item>Date</item>
+        <item>Dragonfruit</item>
+        <item>Durian</item>
+        <item>Elderberry</item>
+        <item>Feijoa</item>
+        <item>Fig</item>
+        <item>Goji berry</item>
+        <item>Gooseberry</item>
+        <item>Grape</item>
+        <item>Raisin</item>
+        <item>Grapefruit</item>
+        <item>Guava</item>
+        <item>Huckleberry</item>
+        <item>Jabuticaba</item>
+        <item>Jackfruit</item>
+        <item>Jambul</item>
+        <item>Jujube</item>
+        <item>Juniper berry</item>
+        <item>Kiwifruit</item>
+        <item>Kumquat</item>
+        <item>Lemon</item>
+        <item>Lime</item>
+        <item>Loquat</item>
+        <item>Longan</item>
+        <item>Lychee</item>
+        <item>Mango</item>
+        <item>Marionberry</item>
+        <item>Melon</item>
+        <item>Cantaloupe</item>
+        <item>Honeydew</item>
+        <item>Watermelon</item>
+        <item>Miracle fruit</item>
+        <item>Mulberry</item>
+        <item>Nectarine</item>
+        <item>Nance</item>
+        <item>Olive</item>
+        <item>Orange</item>
+        <item>Clementine</item>
+        <item>Mandarine</item>
+        <item>Tangerine</item>
+        <item>Papaya</item>
+        <item>Passionfruit</item>
+        <item>Peach</item>
+        <item>Pear</item>
+        <item>Persimmon</item>
+        <item>Physalis</item>
+        <item>Plantain</item>
+        <item>Plum/prune</item>
+        <item>Pineapple</item>
+        <item>Pomegranate</item>
+        <item>Pomelo</item>
+        <item>Purple mangosteen</item>
+        <item>Quince</item>
+        <item>Raspberry</item>
+        <item>Rambutan</item>
+        <item>Redcurrant</item>
+        <item>Salal berry</item>
+        <item>Salak</item>
+        <item>Satsuma</item>
+        <item>Star fruit</item>
+        <item>Strawberry</item>
+        <item>Tamarillo</item>
+        <item>Tamarind</item>
+        <item>Ugli fruit</item>
+    </array>
+</resources>

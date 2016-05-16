@@ -8,5 +8,5 @@
         android:right="10dp"
         android:top="5dp" />
 
-    <solid android:color="@android:color/holo_orange_dark" />
+    <solid android:color="@color/orange" />
 </shape>

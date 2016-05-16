@@ -8,7 +8,7 @@ import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 
 /**
- * Created by Engin on 5/10/2016.
+ * Created by Mohammad Abbas on 5/10/2016.
  */
 public class ResourceUtils {
 

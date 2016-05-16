@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.ColorRes;
@@ -34,6 +35,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import mabbas007.tagsedittext.utils.ResourceUtils;
@@ -49,15 +51,35 @@ public class TagsEditText extends AutoCompleteTextView {
     private static final String SEPARATOR = " ";
     public static final String NEW_LINE = "\n";
 
+    private static final String LAST_STRING = "lastString";
+    private static final String TAGS = "tags";
+    private static final String SUPER_STATE = "superState";
+    private static final String UNDER_CONSTRUCTION_TAG = "underConstructionTag";
+    private static final String ALLOW_SPACES_IN_TAGS = "allowSpacesInTags";
+
+    private static final String TAGS_BACKGROUND = "tagsBackground";
+    private static final String TAGS_TEXT_COLOR = "tagsTextColor";
+    private static final String TAGS_TEXT_SIZE = "tagsTextSize";
+    private static final String LEFT_DRAWABLE_RESOURCE = "leftDrawable";
+    private static final String RIGHT_DRAWABLE_RESOURCE = "rightDrawable";
+    private static final String DRAWABLE_PADDING = "drawablePadding";
+
     private String mLastString = "";
-    private boolean afterTextEnabled = true;
+    private boolean mIsAfterTextWatcherEnabled = true;
 
     private int mTagsTextColor;
     private float mTagsTextSize;
     private int mTagsBackground;
-    private Drawable mCloseDrawableLeft;
-    private Drawable mCloseDrawableRight;
-    private int mCloseDrawablePadding;
+    private Drawable mLeftDrawable;
+    private int mLeftDrawableResouce = 0;
+
+    private Drawable mRightDrawable;
+    private int mRightDrawableResouce = 0;
+
+    private int mDrawablePadding;
+
+    private boolean mIsSpacesAllowedInTags = false;
+    private boolean mIsSetTextDisabled = false;
 
     private List<TagSpan> mTagSpans = new ArrayList<>();
     private List<Tag> mTags = new ArrayList<>();
@@ -75,11 +97,12 @@ public class TagsEditText extends AutoCompleteTextView {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (afterTextEnabled) {
+            if (mIsAfterTextWatcherEnabled) {
                 setTags();
             }
         }
     };
+
 
     public TagsEditText(Context context) {
         super(context);
@@ -116,8 +139,9 @@ public class TagsEditText extends AutoCompleteTextView {
      */
     @Override
     public void setText(CharSequence text, BufferType type) {
+        if (mIsSetTextDisabled) return;
         if (!TextUtils.isEmpty(text)) {
-            String source = text.toString().trim();
+            String source = mIsSpacesAllowedInTags ? text.toString().trim() : text.toString().replaceAll(" ", "");
             if (mTags.isEmpty()) {
                 Tag tag = new Tag();
                 tag.setIndex(0);
@@ -150,7 +174,7 @@ public class TagsEditText extends AutoCompleteTextView {
     /**
      * use this method to set tags
      */
-    public void setTags(CharSequence ... tags) {
+    public void setTags(CharSequence... tags) {
         mTagSpans.clear();
         mTags.clear();
 
@@ -160,7 +184,7 @@ public class TagsEditText extends AutoCompleteTextView {
             Tag tag = new Tag();
             tag.setIndex(i);
             tag.setPosition(position);
-            String source = tags[i].toString().trim();
+            String source = mIsSpacesAllowedInTags ? tags[i].toString().trim() : tags[i].toString().replaceAll(" ", "");
             tag.setSource(source);
             tag.setSpan(true);
             mTags.add(tag);
@@ -170,7 +194,77 @@ public class TagsEditText extends AutoCompleteTextView {
         mTextWatcher.afterTextChanged(getText());
     }
 
+    @Override
+    public Parcelable onSaveInstanceState() {
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(SUPER_STATE, super.onSaveInstanceState());
+
+        Tag[] tags = new Tag[mTags.size()];
+        mTags.toArray(tags);
+
+        bundle.putParcelableArray(TAGS, tags);
+        bundle.putString(LAST_STRING, mLastString);
+        bundle.putString(UNDER_CONSTRUCTION_TAG, getNewTag(getText().toString()));
+
+        bundle.putInt(TAGS_TEXT_COLOR, mTagsTextColor);
+        bundle.putInt(TAGS_BACKGROUND, mTagsBackground);
+        bundle.putFloat(TAGS_TEXT_SIZE, mTagsTextSize);
+        bundle.putInt(LEFT_DRAWABLE_RESOURCE, mLeftDrawableResouce);
+        bundle.putInt(RIGHT_DRAWABLE_RESOURCE, mRightDrawableResouce);
+        bundle.putInt(DRAWABLE_PADDING, mDrawablePadding);
+        bundle.putBoolean(ALLOW_SPACES_IN_TAGS, mIsSpacesAllowedInTags);
+
+        return bundle;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+
+        if (state instanceof Bundle) {
+            Context context = getContext();
+            Bundle bundle = (Bundle) state;
+
+            mTagsTextColor = bundle.getInt(TAGS_TEXT_COLOR, mTagsTextColor);
+            mTagsBackground = bundle.getInt(TAGS_BACKGROUND, mTagsBackground);
+            mTagsTextSize = bundle.getFloat(TAGS_TEXT_SIZE, mTagsTextSize);
+
+            mLeftDrawableResouce = bundle.getInt(LEFT_DRAWABLE_RESOURCE, mLeftDrawableResouce);
+            if (mLeftDrawableResouce != 0) {
+                mLeftDrawable = ResourceUtils.getDrawable(context, mLeftDrawableResouce);
+            }
+
+            mRightDrawableResouce = bundle.getInt(RIGHT_DRAWABLE_RESOURCE, mRightDrawableResouce);
+            if (mRightDrawableResouce != 0) {
+                mRightDrawable = ResourceUtils.getDrawable(context, mRightDrawableResouce);
+            }
+
+            mDrawablePadding = bundle.getInt(DRAWABLE_PADDING, mDrawablePadding);
+            mIsSpacesAllowedInTags = bundle.getBoolean(ALLOW_SPACES_IN_TAGS, mIsSpacesAllowedInTags);
+
+            mLastString = bundle.getString(LAST_STRING);
+            Tag[] tags = (Tag[]) bundle.getParcelableArray(TAGS);
+
+            if (tags != null) {
+                Collections.addAll(mTags, tags);
+                buildStringWithTags(mTags);
+                mTextWatcher.afterTextChanged(getText());
+            }
+            state = bundle.getParcelable(SUPER_STATE);
+            mIsSetTextDisabled = true;
+            super.onRestoreInstanceState(state);
+            mIsSetTextDisabled = false;
+
+            String temp = bundle.getString(UNDER_CONSTRUCTION_TAG);
+            if (!TextUtils.isEmpty(temp))
+                getText().append(temp);
+        } else {
+            super.onRestoreInstanceState(state);
+        }
+    }
+
     private void buildStringWithTags(List<Tag> tags) {
+        mIsAfterTextWatcherEnabled = false;
         getText().clear();
         for (Tag tag : tags) {
             getText().append(tag.getSource()).append(SEPARATOR);
@@ -179,6 +273,7 @@ public class TagsEditText extends AutoCompleteTextView {
         if (!TextUtils.isEmpty(mLastString)) {
             getText().append(NEW_LINE);
         }
+        mIsAfterTextWatcherEnabled = true;
     }
 
     public void setTagsTextColor(@ColorRes int color) {
@@ -197,17 +292,24 @@ public class TagsEditText extends AutoCompleteTextView {
     }
 
     public void setCloseDrawableLeft(@DrawableRes int drawable) {
-        mCloseDrawableLeft = ResourceUtils.getDrawable(getContext(), drawable);
+        mLeftDrawable = ResourceUtils.getDrawable(getContext(), drawable);
+        mLeftDrawableResouce = drawable;
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setCloseDrawableRight(@DrawableRes int drawable) {
-        mCloseDrawableRight = ResourceUtils.getDrawable(getContext(), drawable);
+        mRightDrawable = ResourceUtils.getDrawable(getContext(), drawable);
+        mRightDrawableResouce = drawable;
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setCloseDrawablePadding(@DimenRes int padding) {
-        mCloseDrawablePadding = ResourceUtils.getDimensionPixelSize(getContext(), padding);
+        mDrawablePadding = ResourceUtils.getDimensionPixelSize(getContext(), padding);
+        setTags(convertTagSpanToArray(mTagSpans));
+    }
+
+    public void setTagsWithSpacesEnabled(boolean isSpacesAllowedInTags) {
+        mIsSpacesAllowedInTags = isSpacesAllowedInTags;
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
@@ -218,23 +320,25 @@ public class TagsEditText extends AutoCompleteTextView {
     private void init(@Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         Context context = getContext();
         if (attrs == null) {
+            mIsSpacesAllowedInTags = false;
             mTagsTextColor = ResourceUtils.getColor(context, R.color.defaultTagsTextColor);
             mTagsTextSize = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize);
             mTagsBackground = R.drawable.oval;
-            mCloseDrawableRight = ResourceUtils.getDrawable(context, R.drawable.oval);
-            mCloseDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
+            mRightDrawable = ResourceUtils.getDrawable(context, R.drawable.tag_close);
+            mDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
         } else {
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TagsEditText, defStyleAttr, defStyleRes);
             try {
+                mIsSpacesAllowedInTags = typedArray.getBoolean(R.styleable.TagsEditText_allowSpaceInTag, false);
                 mTagsTextColor = typedArray.getColor(R.styleable.TagsEditText_tagsTextColor,
                         ResourceUtils.getColor(context, R.color.defaultTagsTextColor));
                 mTagsTextSize = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsTextSize,
                         ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize));
                 mTagsBackground = typedArray.getInt(R.styleable.TagsEditText_tagsBackground,
                         R.drawable.oval);
-                mCloseDrawableRight = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageRight);
-                mCloseDrawableLeft = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageLeft);
-                mCloseDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
+                mRightDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageRight);
+                mLeftDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageLeft);
+                mDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
             } finally {
                 typedArray.recycle();
             }
@@ -263,7 +367,7 @@ public class TagsEditText extends AutoCompleteTextView {
     }
 
     private void setTags() {
-        afterTextEnabled = false;
+        mIsAfterTextWatcherEnabled = false;
         boolean isEnterClicked = false;
 
         final Editable editable = getText();
@@ -289,12 +393,12 @@ public class TagsEditText extends AutoCompleteTextView {
             performFiltering(getNewTag(str), 0);
         }
 
-        if (str.endsWith(NEW_LINE) && !isDeleting) {
+        if (str.endsWith(NEW_LINE) || (!mIsSpacesAllowedInTags && str.endsWith(SEPARATOR)) && !isDeleting) {
             buildTags(str);
         }
 
         mLastString = getText().toString();
-        afterTextEnabled = true;
+        mIsAfterTextWatcherEnabled = true;
         if (isEnterClicked && mListener != null) {
             mListener.onEditingFinished();
         }
@@ -338,9 +442,9 @@ public class TagsEditText extends AutoCompleteTextView {
 
     private void updateTags(String newString) {
         String source = getNewTag(newString);
-        if (!TextUtils.isEmpty(source)
-                && !source.equals(NEW_LINE)) {
-            boolean isSpan = source.endsWith(NEW_LINE);
+        if (!TextUtils.isEmpty(source) && !source.equals(NEW_LINE)) {
+            boolean isSpan = source.endsWith(NEW_LINE) ||
+                    (!mIsSpacesAllowedInTags && source.endsWith(SEPARATOR));
             if (isSpan) {
                 source = source.substring(0, source.length() - 1);
                 source = source.trim();
@@ -381,16 +485,16 @@ public class TagsEditText extends AutoCompleteTextView {
             @Override
             public void onClick(View widget) {
                 Editable editable = ((EditText) widget).getText();
-                afterTextEnabled = false;
+                mIsAfterTextWatcherEnabled = false;
                 removeTagSpan(editable, tagSpan, true);
-                afterTextEnabled = true;
+                mIsAfterTextWatcherEnabled = true;
             }
         }, startSpan, endSpan, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     private void removeTagSpan(Editable editable, TagSpan span, boolean includeSpace) {
         int extraLength = includeSpace ? 1 : 0;
-        // inlcude space
+        // include space
         Tag tag = span.getTag();
         int tagPosition = tag.getPosition();
         int tagIndex = tag.getIndex();
@@ -449,10 +553,11 @@ public class TagsEditText extends AutoCompleteTextView {
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTagsTextSize);
         textView.setTextColor(mTagsTextColor);
         textView.setBackgroundResource(mTagsBackground);
-        textView.setCompoundDrawablesWithIntrinsicBounds(mCloseDrawableLeft, null, mCloseDrawableRight, null);
-        textView.setCompoundDrawablePadding(mCloseDrawablePadding);
+        textView.setCompoundDrawablesWithIntrinsicBounds(mLeftDrawable, null, mRightDrawable, null);
+        textView.setCompoundDrawablePadding(mDrawablePadding);
         return textView;
     }
+
 
     private static final class Tag implements Parcelable {
 
@@ -461,7 +566,8 @@ public class TagsEditText extends AutoCompleteTextView {
         private String mSource;
         private boolean mSpan;
 
-        private Tag() {}
+        private Tag() {
+        }
 
         private void setPosition(int pos) {
             mPosition = pos;
@@ -588,6 +694,7 @@ public class TagsEditText extends AutoCompleteTextView {
     public interface TagsEditListener {
 
         void onTagsChanged(Collection<String> tags);
+
         void onEditingFinished();
 
     }

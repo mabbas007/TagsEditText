@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <declare-styleable name="TagsEditText">
+        <attr name="allowSpaceInTag" format="boolean"/>
         <attr name="tagsTextColor" format="color"/>
         <attr name="tagsTextSize" format="dimension"/>
         <attr name="tagsBackground" format="integer"/>

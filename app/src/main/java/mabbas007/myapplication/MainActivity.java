@@ -25,16 +25,12 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mTagsEditText = (TagsEditText) findViewById(R.id.tagsEditText);
-        mTagsEditText.setTags("1", "2", "3", "4", "5 6", " 7 8 ");
+        mTagsEditText.setHint("Enter names of fruits");
         mTagsEditText.setTagsListener(this);
-        int count = 300;
-        List<String> values = new ArrayList<>(count);
-        for (int i = 0; i < count; i++) {
-            values.add(String.valueOf(i));
-        }
+        mTagsEditText.setTagsWithSpacesEnabled(true);
         mTagsEditText.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, values));
-        mTagsEditText.setThreshold(0);
+                android.R.layout.simple_dropdown_item_1line, getResources().getStringArray(R.array.fruits)));
+        mTagsEditText.setThreshold(1);
 
         setButtonClickListener(R.id.btnChangeTags);
         setButtonClickListener(R.id.btnChangeBackground);
@@ -65,7 +61,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.btnChangeColor: {
-                mTagsEditText.setTagsTextColor(android.R.color.black);
+                mTagsEditText.setTagsTextColor(R.color.blackOlive);
                 break;
             }
             case R.id.btnChangeSize: {
@@ -73,7 +69,7 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
             case R.id.btnChangeDrawableLeft: {
-                mTagsEditText.setCloseDrawableLeft(R.drawable.tag_close);
+                mTagsEditText.setCloseDrawableLeft(R.drawable.dot);
                 break;
             }
             case R.id.btnChangeDrawableRight: {
@@ -95,6 +91,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onEditingFinished() {
+        Log.d(TAG,"OnEditing finished");
 //        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 //        imm.hideSoftInputFromWindow(mTagsEditText.getWindowToken(), 0);
 //        //mTagsEditText.clearFocus();
