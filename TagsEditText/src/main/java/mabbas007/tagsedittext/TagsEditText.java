@@ -566,7 +566,26 @@ public class TagsEditText extends AutoCompleteTextView {
         private String mSource;
         private boolean mSpan;
 
+        public static final Creator<Tag> CREATOR = new Creator<Tag>() {
+            @Override
+            public Tag createFromParcel(Parcel in) {
+                return new Tag(in);
+            }
+
+            @Override
+            public Tag[] newArray(int size) {
+                return new Tag[size];
+            }
+        };
+
         private Tag() {
+        }
+
+        protected Tag(Parcel in) {
+            mPosition = in.readInt();
+            mIndex = in.readInt();
+            mSource = in.readString();
+            mSpan = in.readInt() == 1;
         }
 
         private void setPosition(int pos) {
@@ -614,25 +633,6 @@ public class TagsEditText extends AutoCompleteTextView {
             dest.writeInt(mSpan ? 1 : 0);
         }
 
-        protected Tag(Parcel in) {
-            mPosition = in.readInt();
-            mIndex = in.readInt();
-            mSource = in.readString();
-            mSpan = in.readInt() == 1;
-        }
-
-        public static final Creator<Tag> CREATOR = new Creator<Tag>() {
-            @Override
-            public Tag createFromParcel(Parcel in) {
-                return new Tag(in);
-            }
-
-            @Override
-            public Tag[] newArray(int size) {
-                return new Tag[size];
-            }
-        };
-
     }
 
     private static final class TagSpan extends ImageSpan {
@@ -641,14 +641,6 @@ public class TagsEditText extends AutoCompleteTextView {
 
         public TagSpan(Drawable d, String source) {
             super(d, source);
-        }
-
-        private void setTag(Tag tag) {
-            mTag = tag;
-        }
-
-        public Tag getTag() {
-            return mTag;
         }
 
         // private constructors
@@ -687,6 +679,14 @@ public class TagsEditText extends AutoCompleteTextView {
 
         private TagSpan(Context context, int resourceId, int verticalAlignment) {
             super(context, resourceId, verticalAlignment);
+        }
+
+        private void setTag(Tag tag) {
+            mTag = tag;
+        }
+
+        public Tag getTag() {
+            return mTag;
         }
 
     }
