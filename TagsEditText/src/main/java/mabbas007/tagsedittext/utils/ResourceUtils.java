@@ -10,7 +10,11 @@ import android.support.annotation.DrawableRes;
 /**
  * Created by Mohammad Abbas on 5/10/2016.
  */
-public class ResourceUtils {
+public final class ResourceUtils {
+
+    private ResourceUtils() throws InstantiationException {
+        throw new InstantiationException("This utility class is created for instantiation");
+    }
 
     public static int getColor(Context context, @ColorRes int resourceId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
