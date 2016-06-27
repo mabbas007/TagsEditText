@@ -16,6 +16,7 @@ import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
@@ -57,7 +58,7 @@ public class TagsEditText extends AutoCompleteTextView {
     private static final String UNDER_CONSTRUCTION_TAG = "underConstructionTag";
     private static final String ALLOW_SPACES_IN_TAGS = "allowSpacesInTags";
 
-    private static final String TAGS_BACKGROUND = "tagsBackground";
+    private static final String TAGS_BACKGROUND_RESOURCE = "tagsBackground";
     private static final String TAGS_TEXT_COLOR = "tagsTextColor";
     private static final String TAGS_TEXT_SIZE = "tagsTextSize";
     private static final String LEFT_DRAWABLE_RESOURCE = "leftDrawable";
@@ -69,7 +70,8 @@ public class TagsEditText extends AutoCompleteTextView {
 
     private int mTagsTextColor;
     private float mTagsTextSize;
-    private int mTagsBackground;
+    private Drawable mTagsBackground;
+    private int mTagsBackgroundResource = 0;
     private Drawable mLeftDrawable;
     private int mLeftDrawableResouce = 0;
 
@@ -208,7 +210,7 @@ public class TagsEditText extends AutoCompleteTextView {
         bundle.putString(UNDER_CONSTRUCTION_TAG, getNewTag(getText().toString()));
 
         bundle.putInt(TAGS_TEXT_COLOR, mTagsTextColor);
-        bundle.putInt(TAGS_BACKGROUND, mTagsBackground);
+        bundle.putInt(TAGS_BACKGROUND_RESOURCE, mTagsBackgroundResource);
         bundle.putFloat(TAGS_TEXT_SIZE, mTagsTextSize);
         bundle.putInt(LEFT_DRAWABLE_RESOURCE, mLeftDrawableResouce);
         bundle.putInt(RIGHT_DRAWABLE_RESOURCE, mRightDrawableResouce);
@@ -226,17 +228,22 @@ public class TagsEditText extends AutoCompleteTextView {
             Bundle bundle = (Bundle) state;
 
             mTagsTextColor = bundle.getInt(TAGS_TEXT_COLOR, mTagsTextColor);
-            mTagsBackground = bundle.getInt(TAGS_BACKGROUND, mTagsBackground);
+
+            mTagsBackgroundResource = bundle.getInt(TAGS_BACKGROUND_RESOURCE, mTagsBackgroundResource);
+            if (mTagsBackgroundResource != 0) {
+                mTagsBackground = ContextCompat.getDrawable(context, mTagsBackgroundResource);
+            }
+
             mTagsTextSize = bundle.getFloat(TAGS_TEXT_SIZE, mTagsTextSize);
 
             mLeftDrawableResouce = bundle.getInt(LEFT_DRAWABLE_RESOURCE, mLeftDrawableResouce);
             if (mLeftDrawableResouce != 0) {
-                mLeftDrawable = ResourceUtils.getDrawable(context, mLeftDrawableResouce);
+                mLeftDrawable = ContextCompat.getDrawable(context, mLeftDrawableResouce);
             }
 
             mRightDrawableResouce = bundle.getInt(RIGHT_DRAWABLE_RESOURCE, mRightDrawableResouce);
             if (mRightDrawableResouce != 0) {
-                mRightDrawable = ResourceUtils.getDrawable(context, mRightDrawableResouce);
+                mRightDrawable = ContextCompat.getDrawable(context, mRightDrawableResouce);
             }
 
             mDrawablePadding = bundle.getInt(DRAWABLE_PADDING, mDrawablePadding);
@@ -277,7 +284,7 @@ public class TagsEditText extends AutoCompleteTextView {
     }
 
     public void setTagsTextColor(@ColorRes int color) {
-        mTagsTextColor = ResourceUtils.getColor(getContext(), color);
+        mTagsTextColor = ContextCompat.getColor(getContext(), color);
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
@@ -286,19 +293,20 @@ public class TagsEditText extends AutoCompleteTextView {
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
-    public void setTagsBackground(@DrawableRes int background) {
-        mTagsBackground = background;
+    public void setTagsBackground(@DrawableRes int drawable) {
+        mTagsBackground = ContextCompat.getDrawable(getContext(), drawable);
+        mTagsBackgroundResource = drawable;
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setCloseDrawableLeft(@DrawableRes int drawable) {
-        mLeftDrawable = ResourceUtils.getDrawable(getContext(), drawable);
+        mLeftDrawable = ContextCompat.getDrawable(getContext(), drawable);
         mLeftDrawableResouce = drawable;
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
     public void setCloseDrawableRight(@DrawableRes int drawable) {
-        mRightDrawable = ResourceUtils.getDrawable(getContext(), drawable);
+        mRightDrawable = ContextCompat.getDrawable(getContext(), drawable);
         mRightDrawableResouce = drawable;
         setTags(convertTagSpanToArray(mTagSpans));
     }
@@ -321,21 +329,20 @@ public class TagsEditText extends AutoCompleteTextView {
         Context context = getContext();
         if (attrs == null) {
             mIsSpacesAllowedInTags = false;
-            mTagsTextColor = ResourceUtils.getColor(context, R.color.defaultTagsTextColor);
+            mTagsTextColor = ContextCompat.getColor(context, R.color.defaultTagsTextColor);
             mTagsTextSize = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize);
-            mTagsBackground = R.drawable.oval;
-            mRightDrawable = ResourceUtils.getDrawable(context, R.drawable.tag_close);
+            mTagsBackground = ContextCompat.getDrawable(context, R.drawable.oval);
+            mRightDrawable = ContextCompat.getDrawable(context, R.drawable.tag_close);
             mDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
         } else {
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TagsEditText, defStyleAttr, defStyleRes);
             try {
                 mIsSpacesAllowedInTags = typedArray.getBoolean(R.styleable.TagsEditText_allowSpaceInTag, false);
                 mTagsTextColor = typedArray.getColor(R.styleable.TagsEditText_tagsTextColor,
-                        ResourceUtils.getColor(context, R.color.defaultTagsTextColor));
+                        ContextCompat.getColor(context, R.color.defaultTagsTextColor));
                 mTagsTextSize = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsTextSize,
                         ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize));
-                mTagsBackground = typedArray.getInt(R.styleable.TagsEditText_tagsBackground,
-                        R.drawable.oval);
+                mTagsBackground = typedArray.getDrawable(R.styleable.TagsEditText_tagsBackground);
                 mRightDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageRight);
                 mLeftDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageLeft);
                 mDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
@@ -552,7 +559,14 @@ public class TagsEditText extends AutoCompleteTextView {
         textView.setText(text);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTagsTextSize);
         textView.setTextColor(mTagsTextColor);
-        textView.setBackgroundResource(mTagsBackground);
+
+        // check Android version for set background
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            textView.setBackground(mTagsBackground);
+        } else {
+            textView.setBackgroundDrawable(mTagsBackground);
+        }
+
         textView.setCompoundDrawablesWithIntrinsicBounds(mLeftDrawable, null, mRightDrawable, null);
         textView.setCompoundDrawablePadding(mDrawablePadding);
         return textView;

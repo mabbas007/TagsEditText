@@ -16,6 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         TagsEditText:allowSpaceInTag="true"
+        TagsEditText:tagsBackground="@drawable/square_default"
         TagsEditText:tagsCloseImageRight="@drawable/tag_close" />
 
     <ScrollView
@@ -40,42 +41,36 @@
                 android:id="@+id/btnChangeBackground"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="Change Background" />
 
             <Button
                 android:id="@+id/btnChangeColor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="Change Text Color" />
 
             <Button
                 android:id="@+id/btnChangeSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="Change Text Size" />
 
             <Button
                 android:id="@+id/btnChangeDrawableLeft"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="Change Drawable Left" />
 
             <Button
                 android:id="@+id/btnChangeDrawableRight"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="Change Drawable Right" />
 
             <Button
                 android:id="@+id/btnChangeClosePadding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="Change Close Padding" />
         </LinearLayout>
 
