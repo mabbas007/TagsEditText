@@ -7,10 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import mabbas007.tagsedittext.TagsEditText;
 
@@ -53,7 +51,8 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnChangeTags: {
-                mTagsEditText.setTags("1", "2", "3");
+                //mTagsEditText.setTags("1", "2", "3");
+                mTagsEditText.setTags(new String[]{"1","2","3","4"});
                 break;
             }
             case R.id.btnChangeBackground: {

@@ -196,6 +196,30 @@ public class TagsEditText extends AutoCompleteTextView {
         mTextWatcher.afterTextChanged(getText());
     }
 
+    /**
+     * use this method to set tags
+     */
+
+    public void setTags(String[] tags) {
+        mTagSpans.clear();
+        mTags.clear();
+
+        int length = tags != null ? tags.length : 0;
+        int position = 0;
+        for (int i = 0; i < length; i++) {
+            Tag tag = new Tag();
+            tag.setIndex(i);
+            tag.setPosition(position);
+            String source = mIsSpacesAllowedInTags ? tags[i].trim() : tags[i].replaceAll(" ", "");
+            tag.setSource(source);
+            tag.setSpan(true);
+            mTags.add(tag);
+            position += source.length() + 1;
+        }
+        buildStringWithTags(mTags);
+        mTextWatcher.afterTextChanged(getText());
+    }
+
     @Override
     public Parcelable onSaveInstanceState() {
 
