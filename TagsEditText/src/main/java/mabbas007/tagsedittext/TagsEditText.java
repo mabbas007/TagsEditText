@@ -274,9 +274,11 @@ public class TagsEditText extends AutoCompleteTextView {
             mIsSpacesAllowedInTags = bundle.getBoolean(ALLOW_SPACES_IN_TAGS, mIsSpacesAllowedInTags);
 
             mLastString = bundle.getString(LAST_STRING);
-            Tag[] tags = (Tag[]) bundle.getParcelableArray(TAGS);
-
-            if (tags != null) {
+            Parcelable[] tagsParcelables = bundle.getParcelableArray(TAGS);
+            if (tagsParcelables != null) {
+                Tag[] tags = new Tag[tagsParcelables.length];
+                System.arraycopy(tagsParcelables, 0, tags, 0, tagsParcelables.length);
+                mTags = new ArrayList<>();
                 Collections.addAll(mTags, tags);
                 buildStringWithTags(mTags);
                 mTextWatcher.afterTextChanged(getText());
