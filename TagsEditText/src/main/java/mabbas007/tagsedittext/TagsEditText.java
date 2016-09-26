@@ -278,6 +278,7 @@ public class TagsEditText extends AutoCompleteTextView {
             if (tagsParcelables != null) {
                 Tag[] tags = new Tag[tagsParcelables.length];
                 System.arraycopy(tagsParcelables, 0, tags, 0, tagsParcelables.length);
+                mTags = new ArrayList<>();
                 Collections.addAll(mTags, tags);
                 buildStringWithTags(mTags);
                 mTextWatcher.afterTextChanged(getText());
