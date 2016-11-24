@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.ColorInt;
 import android.support.annotation.ColorRes;
 import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
@@ -310,7 +311,7 @@ public class TagsEditText extends AutoCompleteTextView {
     }
 
     public void setTagsTextColor(@ColorRes int color) {
-        mTagsTextColor = ContextCompat.getColor(getContext(), color);
+        mTagsTextColor = getColor(getContext(), color);
         setTags(convertTagSpanToArray(mTagSpans));
     }
 
@@ -351,11 +352,20 @@ public class TagsEditText extends AutoCompleteTextView {
         mListener = listener;
     }
 
+    @ColorInt
+    private int getColor(Context context, @ColorRes int colorId) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            return ContextCompat.getColor(context, colorId);
+        } else {
+            return context.getResources().getColor(colorId);
+        }
+    }
+
     private void init(@Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         Context context = getContext();
         if (attrs == null) {
             mIsSpacesAllowedInTags = false;
-            mTagsTextColor = ContextCompat.getColor(context, R.color.defaultTagsTextColor);
+            mTagsTextColor = getColor(context, R.color.defaultTagsTextColor);
             mTagsTextSize = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize);
             mTagsBackground = ContextCompat.getDrawable(context, R.drawable.oval);
             mRightDrawable = ContextCompat.getDrawable(context, R.drawable.tag_close);
@@ -365,7 +375,7 @@ public class TagsEditText extends AutoCompleteTextView {
             try {
                 mIsSpacesAllowedInTags = typedArray.getBoolean(R.styleable.TagsEditText_allowSpaceInTag, false);
                 mTagsTextColor = typedArray.getColor(R.styleable.TagsEditText_tagsTextColor,
-                        ContextCompat.getColor(context, R.color.defaultTagsTextColor));
+                        getColor(context, R.color.defaultTagsTextColor));
                 mTagsTextSize = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsTextSize,
                         ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsTextSize));
                 mTagsBackground = typedArray.getDrawable(R.styleable.TagsEditText_tagsBackground);
