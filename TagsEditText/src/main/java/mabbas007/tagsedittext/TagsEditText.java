@@ -381,7 +381,8 @@ public class TagsEditText extends AutoCompleteTextView {
                 mTagsBackground = typedArray.getDrawable(R.styleable.TagsEditText_tagsBackground);
                 mRightDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageRight);
                 mLeftDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageLeft);
-                mDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
+                mDrawablePadding = typedArray.getDimensionPixelOffset(R.styleable.TagsEditText_tagsCloseImagePadding,
+                        ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding));
             } finally {
                 typedArray.recycle();
             }
