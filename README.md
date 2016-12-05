@@ -18,7 +18,7 @@ allprojects {
 Step 2. Add the dependency
 ```groovy
 dependencies {
-	compile 'com.github.mabbas007:TagsEditText:v1.0.3'
+	compile 'com.github.mabbas007:TagsEditText:v1.0.4'
 }
 ```
 Step 3. Add TagsEditText to your layout file
