@@ -65,6 +65,10 @@ public class TagsEditText extends AutoCompleteTextView {
     private static final String LEFT_DRAWABLE_RESOURCE = "leftDrawable";
     private static final String RIGHT_DRAWABLE_RESOURCE = "rightDrawable";
     private static final String DRAWABLE_PADDING = "drawablePadding";
+    private static final String TAGS_PADDING_LEFT = "tagsPaddingLeft";
+    private static final String TAGS_PADDING_RIGHT = "tagsPaddingRight";
+    private static final String TAGS_PADDING_TOP = "tagsPaddingTop";
+    private static final String TAGS_PADDING_BOTTOM = "tagsPaddingBottom";
 
     private String mLastString = "";
     private boolean mIsAfterTextWatcherEnabled = true;
@@ -80,6 +84,11 @@ public class TagsEditText extends AutoCompleteTextView {
     private int mRightDrawableResouce = 0;
 
     private int mDrawablePadding;
+
+    private int mTagsPaddingLeft;
+    private int mTagsPaddingRight;
+    private int mTagsPaddingTop;
+    private int mTagsPaddingBottom;
 
     private boolean mIsSpacesAllowedInTags = false;
     private boolean mIsSetTextDisabled = false;
@@ -370,6 +379,10 @@ public class TagsEditText extends AutoCompleteTextView {
             mTagsBackground = ContextCompat.getDrawable(context, R.drawable.oval);
             mRightDrawable = ContextCompat.getDrawable(context, R.drawable.tag_close);
             mDrawablePadding = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding);
+            mTagsPaddingRight = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding);
+            mTagsPaddingLeft = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding);
+            mTagsPaddingTop = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding);
+            mTagsPaddingBottom = ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding);
         } else {
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TagsEditText, defStyleAttr, defStyleRes);
             try {
@@ -383,6 +396,14 @@ public class TagsEditText extends AutoCompleteTextView {
                 mLeftDrawable = typedArray.getDrawable(R.styleable.TagsEditText_tagsCloseImageLeft);
                 mDrawablePadding = typedArray.getDimensionPixelOffset(R.styleable.TagsEditText_tagsCloseImagePadding,
                         ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsCloseImagePadding));
+                mTagsPaddingRight = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsPaddingRight,
+                        ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding));
+                mTagsPaddingLeft = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsPaddingLeft,
+                        ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding));
+                mTagsPaddingTop = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsPaddingTop,
+                        ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding));
+                mTagsPaddingBottom = typedArray.getDimensionPixelSize(R.styleable.TagsEditText_tagsPaddingBottom,
+                        ResourceUtils.getDimensionPixelSize(context, R.dimen.defaultTagsPadding));
             } finally {
                 typedArray.recycle();
             }
@@ -596,6 +617,7 @@ public class TagsEditText extends AutoCompleteTextView {
         textView.setText(text);
         textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTagsTextSize);
         textView.setTextColor(mTagsTextColor);
+        textView.setPadding(mTagsPaddingLeft, mTagsPaddingTop, mTagsPaddingRight, mTagsPaddingBottom);
 
         // check Android version for set background
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
