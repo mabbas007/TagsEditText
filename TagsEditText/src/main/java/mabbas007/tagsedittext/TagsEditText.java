@@ -50,7 +50,6 @@ import mabbas007.tagsedittext.utils.ResourceUtils;
  */
 public class TagsEditText extends AutoCompleteTextView {
 
-    private static final String SEPARATOR = " ";
     public static final String NEW_LINE = "\n";
 
     private static final String LAST_STRING = "lastString";
@@ -65,11 +64,8 @@ public class TagsEditText extends AutoCompleteTextView {
     private static final String LEFT_DRAWABLE_RESOURCE = "leftDrawable";
     private static final String RIGHT_DRAWABLE_RESOURCE = "rightDrawable";
     private static final String DRAWABLE_PADDING = "drawablePadding";
-    private static final String TAGS_PADDING_LEFT = "tagsPaddingLeft";
-    private static final String TAGS_PADDING_RIGHT = "tagsPaddingRight";
-    private static final String TAGS_PADDING_TOP = "tagsPaddingTop";
-    private static final String TAGS_PADDING_BOTTOM = "tagsPaddingBottom";
 
+    private String mSeparator = " ";
     private String mLastString = "";
     private boolean mIsAfterTextWatcherEnabled = true;
 
@@ -115,6 +111,13 @@ public class TagsEditText extends AutoCompleteTextView {
         }
     };
 
+    public List<String> getTags(){
+        return convertTagSpanToList(mTagSpans);
+    }
+
+    public void setSeparator(String separator) {
+        mSeparator = separator;
+    }
 
     public TagsEditText(Context context) {
         super(context);
@@ -310,7 +313,7 @@ public class TagsEditText extends AutoCompleteTextView {
         mIsAfterTextWatcherEnabled = false;
         getText().clear();
         for (Tag tag : tags) {
-            getText().append(tag.getSource()).append(SEPARATOR);
+            getText().append(tag.getSource()).append(mSeparator);
         }
         mLastString = getText().toString();
         if (!TextUtils.isEmpty(mLastString)) {
@@ -442,7 +445,7 @@ public class TagsEditText extends AutoCompleteTextView {
         }
 
         boolean isDeleting = mLastString.length() > str.length();
-        if (mLastString.endsWith(SEPARATOR)
+        if (mLastString.endsWith(mSeparator)
                 && !str.endsWith(NEW_LINE)
                 && isDeleting
                 && !mTagSpans.isEmpty()) {
@@ -458,7 +461,7 @@ public class TagsEditText extends AutoCompleteTextView {
             performFiltering(getNewTag(str), 0);
         }
 
-        if (str.endsWith(NEW_LINE) || (!mIsSpacesAllowedInTags && str.endsWith(SEPARATOR)) && !isDeleting) {
+        if (str.endsWith(NEW_LINE) || (!mIsSpacesAllowedInTags && str.endsWith(mSeparator)) && !isDeleting) {
             buildTags(str);
         }
 
@@ -509,7 +512,7 @@ public class TagsEditText extends AutoCompleteTextView {
         String source = getNewTag(newString);
         if (!TextUtils.isEmpty(source) && !source.equals(NEW_LINE)) {
             boolean isSpan = source.endsWith(NEW_LINE) ||
-                    (!mIsSpacesAllowedInTags && source.endsWith(SEPARATOR));
+                    (!mIsSpacesAllowedInTags && source.endsWith(mSeparator));
             if (isSpan) {
                 source = source.substring(0, source.length() - 1);
                 source = source.trim();
@@ -534,14 +537,14 @@ public class TagsEditText extends AutoCompleteTextView {
         StringBuilder builder = new StringBuilder();
         for (Tag tag : mTags) {
             if (!tag.isSpan()) continue;
-            builder.append(tag.getSource()).append(SEPARATOR);
+            builder.append(tag.getSource()).append(mSeparator);
         }
         return newString.replace(builder.toString(), "");
     }
 
     private void addTagSpan(SpannableStringBuilder sb, final TagSpan tagSpan) {
         String source = tagSpan.getSource();
-        sb.append(source).append(SEPARATOR);
+        sb.append(source).append(mSeparator);
         int length = sb.length();
         int startSpan = length - (source.length() + 1);
         int endSpan = length - 1;
