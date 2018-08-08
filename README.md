@@ -1,3 +1,5 @@
+**Unfortunately, I'm busy to maintain this project, so please feel free to fork it and adjust it the way you want**
+
 <a href="https://android-arsenal.com/details/1/3581/" rel="Android Arsenal TagsEditText">![TagsEditText](https://img.shields.io/badge/Android%20Arsenal-TagsEditText-green.svg?style=true%29%5D%28https://android-arsenal.com/details/1/3581)
 Welcome to TagEditView!
 ===================
